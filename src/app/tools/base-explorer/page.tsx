@@ -6,13 +6,23 @@ import { PixelButton } from '@/components/PixelButton';
 
 const base64Encode = (str: string): string => {
     try {
-        return btoa(unescape(encodeURIComponent(str)));
+        const bytes = new TextEncoder().encode(str);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
     } catch { return 'Error: Invalid input'; }
 };
 
 const base64Decode = (str: string): string => {
     try {
-        return decodeURIComponent(escape(atob(str)));
+        const binary = atob(str);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return new TextDecoder().decode(bytes);
     } catch { return 'Error: Invalid Base64'; }
 };
 
@@ -55,36 +65,41 @@ const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const base58Encode = (str: string): string => {
     try {
         const bytes = new TextEncoder().encode(str);
+        let leadingZeros = 0;
+        while (leadingZeros < bytes.length && bytes[leadingZeros] === 0) leadingZeros++;
         let num = BigInt(0);
         for (const b of bytes) num = num * 256n + BigInt(b);
-        if (num === 0n) return '1';
+        if (num === 0n) return base58Chars[0].repeat(leadingZeros || 1);
         let result = '';
         while (num > 0n) {
             result = base58Chars[Number(num % 58n)] + result;
             num = num / 58n;
         }
-        for (const b of bytes) {
-            if (b === 0) result = '1' + result;
-            else break;
-        }
+        result = base58Chars[0].repeat(leadingZeros) + result;
         return result;
     } catch { return 'Error: Invalid input'; }
 };
 
 const base58Decode = (str: string): string => {
     try {
+        let leadingZeros = 0;
+        while (leadingZeros < str.length && str[leadingZeros] === base58Chars[0]) leadingZeros++;
         let num = BigInt(0);
         for (const char of str) {
             const idx = base58Chars.indexOf(char);
             if (idx === -1) throw new Error('Invalid character');
             num = num * 58n + BigInt(idx);
         }
-        const hex = num.toString(16).padStart(2, '0');
+        let hex = num.toString(16);
+        if (hex.length % 2 !== 0) hex = '0' + hex;
         const bytes: number[] = [];
         for (let i = 0; i < hex.length; i += 2) {
             bytes.push(parseInt(hex.slice(i, i + 2), 16));
         }
-        return new TextDecoder().decode(new Uint8Array(bytes));
+        const result = new Uint8Array(leadingZeros + bytes.length);
+        result.set(new Uint8Array(leadingZeros), 0);
+        result.set(new Uint8Array(bytes), leadingZeros);
+        return new TextDecoder().decode(result);
     } catch { return 'Error: Invalid Base58'; }
 };
 
@@ -106,7 +121,7 @@ const base85Encode = (str: string): string => {
             result += chunk;
         }
         const extra = (4 - (bytes.length % 4)) % 4;
-        return result.slice(0, result.length - extra);
+        return extra === 0 ? result : result.slice(0, -extra);
     } catch { return 'Error: Invalid input'; }
 };
 
@@ -124,7 +139,8 @@ const base85Decode = (str: string): string => {
             }
             bytes.push((num >> 24) & 0xff, (num >> 16) & 0xff, (num >> 8) & 0xff, num & 0xff);
         }
-        return new TextDecoder().decode(new Uint8Array(bytes.slice(0, bytes.length - extra)));
+        const result = bytes.slice(0, bytes.length - extra);
+        return new TextDecoder().decode(new Uint8Array(result));
     } catch { return 'Error: Invalid Base85'; }
 };
 
@@ -176,6 +192,10 @@ export default function BaseExplorerPage() {
     const [mode, setMode] = useState<'encode' | 'decode'>('encode');
 
     const handleProcess = useCallback(() => {
+        if (!input.trim()) {
+            setOutput('⚠️ Input is empty');
+            return;
+        }
         const processor = encoders[encoding];
         const result = mode === 'encode' ? processor.encode(input) : processor.decode(input);
         setOutput(result);
