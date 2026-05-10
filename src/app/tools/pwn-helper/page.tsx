@@ -1,15 +1,17 @@
 "use client";
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { PixelCard } from '@/components/PixelCard';
 import { PixelButton } from '@/components/PixelButton';
 
 const generatePattern = (length: number): string => {
-    const fullCharset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lower = 'abcdefghijklmnopqrstuvwxyz';
+    const digits = '0123456789';
     let pattern = '';
-    for (let i = 0; i < fullCharset.length && pattern.length < length; i++) {
-        for (let j = 0; j < fullCharset.length && pattern.length < length; j++) {
-            for (let k = 0; k < fullCharset.length && pattern.length < length; k++) {
-                pattern += fullCharset[i] + fullCharset[j] + fullCharset[k];
+    for (let i = 0; i < upper.length && pattern.length < length; i++) {
+        for (let j = 0; j < lower.length && pattern.length < length; j++) {
+            for (let k = 0; k < digits.length && pattern.length < length; k++) {
+                pattern += upper[i] + lower[j] + digits[k];
             }
         }
     }
@@ -18,13 +20,15 @@ const generatePattern = (length: number): string => {
 
 const findPatternOffset = (pattern: string, value: string): number => {
     let search = value;
-    if (/^(0x)?[0-9a-fA-F]+$/.test(value)) {
+    if (/^(0x)?[0-9a-fA-F]+$/.test(value) && value.length <= 10) {
         const hex = value.replace(/^0x/, '');
         const bytes: number[] = [];
         for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.slice(i, i + 2), 16));
-        search = String.fromCharCode(...bytes.reverse());
+        if (bytes.length === 4) bytes.reverse();
+        search = bytes.map(b => String.fromCharCode(b)).join('');
     }
-    const idx = generatePattern(10000).indexOf(search);
+    const fullPattern = generatePattern(5000);
+    const idx = fullPattern.indexOf(search);
     return idx;
 };
 
@@ -52,20 +56,29 @@ const calcOffset = (base: string, target: string): string => {
         const b = BigInt(base.startsWith('0x') ? base : '0x' + base);
         const t = BigInt(target.startsWith('0x') ? target : '0x' + target);
         const diff = t - b;
-        return `Offset: ${diff.toString(10)} (0x${diff.toString(16).toUpperCase()})`;
+        const signed = diff > BigInt(0x7fffffff) ? diff - BigInt(0x100000000) : diff;
+        return `Offset: ${diff.toString(10)} (0x${diff.toString(16).toUpperCase()})${signed !== diff ? ` / ${signed.toString(10)}` : ''}`;
     } catch { return 'Invalid addresses'; }
 };
 
 const packLittleEndian = (hex: string): string => {
-    const clean = hex.replace(/^0x/, '').padStart(8, '0');
-    const bytes = clean.match(/.{2}/g) || [];
-    return bytes.reverse().map(b => '\\x' + b.toLowerCase()).join('');
+    try {
+        const clean = hex.replace(/^0x/, '');
+        if (!/^[0-9a-fA-F]+$/.test(clean)) return 'Invalid hex';
+        const padded = clean.length % 2 !== 0 ? '0' + clean : clean;
+        const bytes = padded.match(/.{2}/g) || [];
+        return bytes.reverse().map(b => '\\x' + b.toLowerCase()).join('');
+    } catch { return 'Invalid hex'; }
 };
 
 const packBigEndian = (hex: string): string => {
-    const clean = hex.replace(/^0x/, '').padStart(8, '0');
-    const bytes = clean.match(/.{2}/g) || [];
-    return bytes.map(b => '\\x' + b.toLowerCase()).join('');
+    try {
+        const clean = hex.replace(/^0x/, '');
+        if (!/^[0-9a-fA-F]+$/.test(clean)) return 'Invalid hex';
+        const padded = clean.length % 2 !== 0 ? '0' + clean : clean;
+        const bytes = padded.match(/.{2}/g) || [];
+        return bytes.map(b => '\\x' + b.toLowerCase()).join('');
+    } catch { return 'Invalid hex'; }
 };
 
 type ToolType = 'converter' | 'pattern' | 'offset' | 'packing';
@@ -74,12 +87,14 @@ export default function PwnHelperPage() {
     const [tool, setTool] = useState<ToolType>('converter');
     const [input, setInput] = useState('');
     const [patternLen, setPatternLen] = useState(200);
-    const [pattern, setPattern] = useState('');
+    const [regenerate, setRegenerate] = useState(0);
     const [offsetResult, setOffsetResult] = useState('');
     const [baseAddr, setBaseAddr] = useState('');
     const [targetAddr, setTargetAddr] = useState('');
     const [addrCalcResult, setAddrCalcResult] = useState('');
     const [packResult, setPackResult] = useState({ le: '', be: '' });
+
+    const pattern = useMemo(() => generatePattern(patternLen), [patternLen, regenerate]);
 
     const conversions = input ? {
         'HEX → DEC': /^(0x)?[0-9a-fA-F]+$/.test(input) ? hexToDec(input) : '-',
@@ -90,7 +105,7 @@ export default function PwnHelperPage() {
         'BIN → DEC': /^[01]+$/.test(input) ? binToDec(input) : '-',
     } : {};
 
-    const handleGeneratePattern = useCallback(() => setPattern(generatePattern(patternLen)), [patternLen]);
+    const handleGeneratePattern = useCallback(() => setRegenerate(c => c + 1), []);
     const handleFindOffset = useCallback(() => {
         const off = findPatternOffset(pattern, input);
         setOffsetResult(off >= 0 ? `Found at offset: ${off}` : 'Pattern not found');
