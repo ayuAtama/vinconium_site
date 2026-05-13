@@ -1,3 +1,5 @@
+/* globals.css - Fully Optimized for All Devices */
+
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
@@ -20,7 +22,7 @@
   --pixel-shadow-sm: calc(var(--pixel-unit) * 2);
   --pixel-shadow-lg: calc(var(--pixel-unit) * 8);
 
-  /* Fluid Typography - Industry Standard */
+  /* Fluid Typography - Responsive font sizes */
   --font-size-xs: clamp(0.6rem, 0.4vw + 0.5rem, 0.75rem);
   --font-size-sm: clamp(0.75rem, 0.5vw + 0.7rem, 0.875rem);
   --font-size-base: clamp(0.875rem, 0.6vw + 0.8rem, 1rem);
@@ -30,27 +32,26 @@
   --font-size-hero: clamp(0.9rem, 8vw, 8rem);
 }
 
+/* Container width limit - using rem instead of arbitrary value */
 .max-w-container {
-  max-width: min(100%, 7xl);
+  max-width: min(100%, 80rem);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-
   --color-neon-green: var(--neon-green);
   --color-cyber-pink: var(--cyber-pink);
   --color-retro-yellow: var(--retro-yellow);
   --color-deep-space: var(--deep-space);
   --color-pixel-gray: var(--pixel-gray);
-
   --font-pixel: var(--font-pixel);
-
   --shadow-pixel: var(--pixel-shadow) var(--pixel-shadow) 0px 0px #000;
   --shadow-pixel-sm: var(--pixel-shadow-sm) var(--pixel-shadow-sm) 0px 0px #000;
   --shadow-pixel-lg: var(--pixel-shadow-lg) var(--pixel-shadow-lg) 0px 0px #000;
 }
 
+/* Base body styles */
 body {
   background: var(--background);
   color: var(--foreground);
@@ -61,196 +62,107 @@ body {
 }
 
 /* Fluid Text Utility Classes */
-.text-fluid-hero {
-  font-size: var(--font-size-hero);
-  line-height: 0.9;
-}
+.text-fluid-hero { font-size: var(--font-size-hero); line-height: 0.9; }
+.text-fluid-2xl { font-size: var(--font-size-2xl); line-height: 1.1; }
+.text-fluid-xl { font-size: var(--font-size-xl); line-height: 1.2; }
+.text-fluid-lg { font-size: var(--font-size-lg); }
+.text-fluid-base { font-size: var(--font-size-base); }
+.text-fluid-sm { font-size: var(--font-size-sm); }
+.text-fluid-xs { font-size: var(--font-size-xs); }
 
-.text-fluid-2xl {
-  font-size: var(--font-size-2xl);
-  line-height: 1.1;
-}
+/* Custom Scrollbar - Lightweight for mobile */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--deep-space); }
+::-webkit-scrollbar-thumb { background: var(--pixel-gray); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
 
-.text-fluid-xl {
-  font-size: var(--font-size-xl);
-  line-height: 1.2;
-}
-
-.text-fluid-lg {
-  font-size: var(--font-size-lg);
-}
-
-.text-fluid-base {
-  font-size: var(--font-size-base);
-}
-
-.text-fluid-sm {
-  font-size: var(--font-size-sm);
-}
-
-.text-fluid-xs {
-  font-size: var(--font-size-xs);
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 12px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--deep-space);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--pixel-gray);
-  border: 2px solid #000;
-  box-shadow: inset -2px -2px 0px 0px rgba(0, 0, 0, 0.5);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--neon-green);
-}
-
-/* Glitch Animation Refined */
+/* Optimized keyframes with GPU acceleration (translate3d) */
 @keyframes glitch-1 {
-  0% {
-    clip-path: inset(20% 0 80% 0);
-    transform: translate(-1px, 1px);
-  }
-
-  20% {
-    clip-path: inset(60% 0 10% 0);
-    transform: translate(1px, -1px);
-  }
-
-  40% {
-    clip-path: inset(40% 0 50% 0);
-    transform: translate(-1px, 1px);
-  }
-
-  60% {
-    clip-path: inset(80% 0 5% 0);
-    transform: translate(1px, -1px);
-  }
-
-  80% {
-    clip-path: inset(10% 0 60% 0);
-    transform: translate(-1px, 1px);
-  }
-
-  100% {
-    clip-path: inset(30% 0 30% 0);
-    transform: translate(1px, -1px);
-  }
+  0%, 100% { clip-path: inset(20% 0 80% 0); transform: translate3d(0, 0, 0); }
+  20% { clip-path: inset(60% 0 10% 0); transform: translate3d(1px, -1px, 0); }
+  40% { clip-path: inset(40% 0 50% 0); transform: translate3d(-1px, 1px, 0); }
+  60% { clip-path: inset(80% 0 5% 0); transform: translate3d(1px, -1px, 0); }
+  80% { clip-path: inset(10% 0 60% 0); transform: translate3d(-1px, 1px, 0); }
 }
 
 @keyframes glitch-2 {
-  0% {
-    clip-path: inset(10% 0 85% 0);
-    transform: translate(1px, -1px);
-  }
-
-  25% {
-    clip-path: inset(55% 0 15% 0);
-    transform: translate(-1px, 1px);
-  }
-
-  50% {
-    clip-path: inset(35% 0 45% 0);
-    transform: translate(1px, -1px);
-  }
-
-  75% {
-    clip-path: inset(75% 0 10% 0);
-    transform: translate(-1px, 1px);
-  }
-
-  100% {
-    clip-path: inset(25% 0 35% 0);
-    transform: translate(1px, -1px);
-  }
+  0%, 100% { clip-path: inset(10% 0 85% 0); transform: translate3d(0, 0, 0); }
+  25% { clip-path: inset(55% 0 15% 0); transform: translate3d(-1px, 1px, 0); }
+  50% { clip-path: inset(35% 0 45% 0); transform: translate3d(1px, -1px, 0); }
+  75% { clip-path: inset(75% 0 10% 0); transform: translate3d(-1px, 1px, 0); }
 }
 
-.animate-glitch-1 {
-  animation: glitch-1 4s infinite linear alternate-reverse;
+@keyframes scanline {
+  0% { transform: translate3d(0, -100%, 0); }
+  100% { transform: translate3d(0, 100%, 0); }
 }
 
-.animate-glitch-2 {
-  animation: glitch-2 3s infinite linear alternate-reverse;
+@keyframes radar-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* CRT Effects - Softened for Readability */
+/* Animation classes with performance hints */
+.animate-glitch-1 { animation: glitch-1 4s infinite linear alternate-reverse; will-change: transform, clip-path; }
+.animate-glitch-2 { animation: glitch-2 3s infinite linear alternate-reverse; will-change: transform, clip-path; }
+.animate-scanline { animation: scanline 6s linear infinite; will-change: transform; }
+.animate-radar { animation: radar-spin 4s linear infinite; will-change: transform; }
+
+/* CRT overlay - GPU accelerated for desktop */
 .crt-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%,
-      rgba(0, 0, 0, 0.03) 50%),
-    linear-gradient(90deg,
-      rgba(255, 0, 0, 0.01),
-      rgba(0, 255, 0, 0.01),
-      rgba(0, 0, 255, 0.01));
-  background-size: 100% 4px, 3px 100%;
   pointer-events: none;
   z-index: 9999;
-  opacity: 1;
+  transform: translateZ(0);
 }
 
-.crt-flicker {
-  animation: flicker 0.3s infinite;
-  pointer-events: none;
-}
-
-@keyframes flicker {
-  0% {
-    opacity: 0.99;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.995;
-  }
-}
-
-@keyframes hp-pulse {
-  0% {
-    filter: brightness(1);
-  }
-
-  50% {
-    filter: brightness(1.2);
-  }
-
-  100% {
-    filter: brightness(1);
-  }
-}
-
-.animate-hp-pulse {
-  animation: hp-pulse 2s infinite ease-in-out;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Glass UI Helper */
+/* Glass morphism effect - reduced blur for performance */
 .pixel-glass {
   background: rgba(33, 33, 41, 0.7);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px);
   border: var(--border-width) solid rgba(255, 255, 255, 0.05);
 }
 
+/* 
+   MOBILE OPTIMIZATION */
+@media (max-width: 768px) {
+  /* Disable all heavy effects on mobile devices */
+  .crt-overlay, .crt-flicker {
+    display: none !important;
+  }
+  
+  /* Kill all animations on mobile to save CPU */
+  .animate-glitch-1, .animate-glitch-2, 
+  .animate-scanline, .animate-radar, 
+  .animate-hp-pulse {
+    animation: none !important;
+  }
+  
+  /* Remove backdrop-filter (GPU heavy) on mobile */
+  .pixel-glass {
+    background: rgba(33, 33, 41, 0.9);
+    backdrop-filter: none !important;
+  }
+}
+
+/* Respect user's OS motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-glitch-1, .animate-glitch-2, 
+  .animate-scanline, .animate-radar, 
+  .animate-hp-pulse {
+    animation: none !important;
+  }
+}
+
+/* Utility Classes */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Pixel perfect border with outer shadow */
 .pixel-border-outer {
   box-shadow:
     0 var(--border-width) 0 0 #000,
@@ -259,34 +171,7 @@ body {
     calc(var(--border-width) * -1) 0 0 0 #000;
 }
 
-@keyframes scanline {
-  0% {
-    transform: translateY(-100%);
-  }
-
-  100% {
-    transform: translateY(100%);
-  }
-}
-
-@keyframes radar-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-scanline {
-  animation: scanline 4s linear infinite;
-}
-
-.animate-radar {
-  animation: radar-spin 4s linear infinite;
-}
-
+/* Ensure crisp pixelated images */
 .image-rendering-pixelated {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
